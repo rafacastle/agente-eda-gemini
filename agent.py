@@ -1,17 +1,38 @@
 from google import genai
+from google.genai import types
 import pandas as pd
 
 class EDA_Agent:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, df: pd.DataFrame):
         self.client = genai.Client(api_key=api_key)
-        # Usamos gemini-2.5-flash (o gemini-2.0-flash)
-        self.model_id = 'gemini-2.5-flash'
-        print("🤖 Cerebro Gemini inicializado con la NUEVA API (google-genai).")
+        self.df = df 
+        
+        def obtener_informacion_columnas() -> str:
+            """Usa esta herramienta SIEMPRE para descubrir los nombres de las columnas y sus tipos de datos antes de hacer un análisis."""
+            buffer = []
+            for col in self.df.columns:
+                buffer.append(f"{col}: {self.df[col].dtype}")
+            return "\n".join(buffer)
 
-    def test_connection(self):
-        """Un método simple para probar que el LLM responde."""
-        respuesta = self.client.models.generate_content(
-            model=self.model_id,
-            contents="Eres un agente científico de datos. Saluda en 1 oración."
+        instrucciones_sistema = """
+        Eres un agente experto en Ciencia de Datos de nivel Senior. 
+        Tu objetivo es realizar Análisis Exploratorio de Datos (EDA).
+        Tus respuestas deben ser analíticas, directas y enfocadas en hallazgos estadísticos.
+        """
+        
+        config = types.GenerateContentConfig(
+            system_instruction=instrucciones_sistema,
+            temperature=0.1,
+            tools=[obtener_informacion_columnas], 
         )
+        
+        # Actualizamos a la versión 3.8-flash indicada por la API para uso gratuito
+        self.chat = self.client.chats.create(
+            model='gemini-3.8-flash', 
+            config=config
+        )
+        print("🤖 Cerebro Gemini inicializado con Gemini 3.8 Flash (capa gratuita).")
+
+    def interactuar(self, mensaje: str):
+        respuesta = self.chat.send_message(mensaje)
         return respuesta.text
