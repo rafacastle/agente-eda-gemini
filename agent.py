@@ -15,15 +15,15 @@ class SistemaMultiAgenteEDA:
         def ejecutar_agente_eda(instruccion_analitica: str) -> str:
             """Llama a este agente primero para explorar el DataFrame, ver columnas, nulos y estadísticas."""
             print(f"\n📊 [Agente EDA] Activado. Tarea: {instruccion_analitica}")
-            
+
             def obtener_columnas() -> str:
                 """Devuelve nombres de columnas y tipos de datos."""
                 return "\n".join([f"{col}: {self.df[col].dtype}" for col in self.df.columns])
-                
+
             def resumen_estadistico() -> str:
                 """Devuelve estadísticas descriptivas numéricas."""
                 return self.df.describe().to_string()
-                
+
             def detectar_nulos() -> str:
                 """Devuelve el conteo de valores nulos por columna."""
                 nulos = self.df.isnull().sum()
@@ -66,7 +66,7 @@ class SistemaMultiAgenteEDA:
                 return f"Archivo {nombre_archivo} creado exitosamente."
 
             config_redactor = types.GenerateContentConfig(
-                system_instruction="""Eres un Consultor Estratégico. 
+                system_instruction="""Eres un Consultor Estratégico.
                 1. Toma los datos estadísticos que te pasen.
                 2. Usa 'buscar_en_google' para contrastar un dato curioso con la realidad histórica.
                 3. Redacta un reporte ejecutivo en Markdown bien estructurado y DEBES guardarlo usando 'guardar_reporte_disco'.""",
@@ -91,13 +91,13 @@ class SistemaMultiAgenteEDA:
                 try:
                     # Agregamos explícitamente agent.py intacto y el nuevo reporte
                     subprocess.run(["git", "add", "agent.py", archivo_reporte], check=True)
-                    
+
                     # Hacemos el commit
                     res_commit = subprocess.run(
                         ["git", "commit", "-m", commit_msg],
                         capture_output=True, text=True
                     )
-                    
+
                     # Subimos a la rama main
                     res_push = subprocess.run(
                         ["git", "push", "origin", "main"],
